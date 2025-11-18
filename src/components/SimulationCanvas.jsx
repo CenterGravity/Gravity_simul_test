@@ -1,44 +1,63 @@
 // src/components/SimulationCanvas.jsx
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { calculateGravityForce, updatePositions } from "../hooks/useGravitySimulation";
+import { updatePositions } from "../hooks/useGravitySimulation";
+import CurvaturePlane from "./CurvaturePlane";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-const mass1 = 30;
-const mass2 = 50;
+const mass1 = 10;  
+const mass2 = 3;
 
 export default function SimulationCanvas() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     // === 기본 설정 ===
-    let bodies = [
+    let bodies = [ // 바디바디 후 바디바디 예
       {
         mass: mass1,
-        pos: { x: -15, y: 0, z: 0 },
-        vel: { x: 0, y: 0, z: 0 }
+        pos: { x: -2, y: 0, z: 0 },
+        vel: { x:0, y: 0, z: 0 }
       },
       {
         mass: mass2,
-        pos: { x: 15, y: 0, z: 0 },
-        vel: { x: 0, y: 0, z: 0 }
+        pos: { x: 2, y: 0, z: 0 },
+        vel: { x: 0, y: 0, z: 1 }
       }
     ];
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000); // 검은 배경
+    const scene = new THREE.Scene(); // 장면 생성
+    scene.background = new THREE.Color(0x020202); // 검은 배경
+
+    // === 축 추가 ===
+    const axes = new THREE.AxesHelper(1);
+    scene.add(axes);
+
+    // === 곡률 평면 생성 ===
+    const curvaturePlane = CurvaturePlane(bodies);
+    scene.add(curvaturePlane);
+    console.log(scene.children);
 
     const camera = new THREE.PerspectiveCamera(
-      75,
+      100,
       window.innerWidth / window.innerHeight,
-      0.1,
+      1,
       1000
     );
-    camera.position.set(0, 20, 50);
+    camera.position.set(0, 2, 5);
+    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       antialias: true,
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enablePan = true;
+    controls.enableZoom = true;
+    controls.rotateSpeed = 0.7;
 
     // === 조명 ===
     const light = new THREE.PointLight(0xffffff, 100);
@@ -66,8 +85,10 @@ export default function SimulationCanvas() {
 
     // === 애니메이션 ===
     const animate = () => {
-      const dt = 0.01;
+      controls.update();
+      const dt = 0.01; // 시간 간격 설정
       bodies = updatePositions(bodies, dt);
+      curvaturePlane.updateCurvature(bodies);
       sphere1.position.set(bodies[0].pos.x, bodies[0].pos.y, bodies[0].pos.z);
       sphere2.position.set(bodies[1].pos.x, bodies[1].pos.y, bodies[1].pos.z);
       renderer.render(scene, camera);
