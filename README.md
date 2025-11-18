@@ -23,7 +23,9 @@
 
   쉽게 말해 선언과 동시에 내보내기를 진행하지 않으면 브라우저가 없다고 판단하고 에러를 띄우는 것.
 
-## npm → pnpm 마이그레이션 메모
+### 2025년 11월 18일
+
+### npm → pnpm 마이그레이션 메모
 
 - 전제: 로컬에 Node 18+ 설치, 프로젝트 루트(`/Users/kiwi/Desktop/개발/GVProject/Gravity_sim_demo`).
 - `npm install -g pnpm` 또는 `corepack enable pnpm`으로 pnpm 설치/활성화.
