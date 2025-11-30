@@ -5,25 +5,25 @@ import { updatePositions } from "../hooks/useGravitySimulation";
 import CurvaturePlane from "./CurvaturePlane";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-const mass1 = 10;  
-const mass2 = 3;
-
+const mass1 = 10;
+const mass2 = 1;
 export default function SimulationCanvas() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     // === 기본 설정 ===
-    let bodies = [ // 바디바디 후 바디바디 예
+    let bodies = [
+      // 바디바디 후 바디바디 예
       {
         mass: mass1,
-        pos: { x: -2, y: 0, z: 0 },
-        vel: { x:0, y: 0, z: 0 }
+        pos: { x: -6, y: 0, z: 0 },
+        vel: { x: 0, y: 0, z: 0 },
       },
       {
         mass: mass2,
-        pos: { x: 2, y: 0, z: 0 },
-        vel: { x: 0, y: 0, z: 1 }
-      }
+        pos: { x: 6, y: 0, z: 0 },
+        vel: { x: 0, y: 0, z: 1 },
+      },
     ];
     const scene = new THREE.Scene(); // 장면 생성
     scene.background = new THREE.Color(0x020202); // 검은 배경
@@ -61,21 +61,24 @@ export default function SimulationCanvas() {
 
     // === 조명 ===
     const light = new THREE.PointLight(0xffffff, 100);
-    light.position.set(5, 5, 5);
+    light.position.set(0, 5, 0);
     scene.add(light);
 
     const ambient = new THREE.AmbientLight(0x404040, 3); // 약한 전체 조명
     scene.add(ambient);
 
     // === 구 2개 생성 ===
+
+    const radius1 = mass1 ** (1 / 3) * 5;
     const sphere1 = new THREE.Mesh(
-      new THREE.SphereGeometry(mass1 / 10, 32, 32),
+      new THREE.SphereGeometry(radius1 / 10, 32, 32),
       new THREE.MeshStandardMaterial({ color: 0x00aaff })
     );
     sphere1.position.x = -1.5;
 
+    const radius2 = mass2 ** (1 / 3) * 5;
     const sphere2 = new THREE.Mesh(
-      new THREE.SphereGeometry(mass2 / 10, 32, 32),
+      new THREE.SphereGeometry(radius2 / 10, 32, 32),
       new THREE.MeshStandardMaterial({ color: 0xff5533 })
     );
     sphere2.position.x = 1.5;

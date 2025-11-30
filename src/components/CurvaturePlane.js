@@ -1,34 +1,47 @@
 import * as THREE from "three";
 
 export default function CurvaturePlane(bodies) {
-  const geometry = new THREE.PlaneGeometry(10, 10, 10, 10); // 너비, 높이, 세그먼트 수 설정
-  geometry.rotateX(-Math.PI / 2); // 평면을 수평으로 회전
+  const geometry = new THREE.PlaneGeometry(20, 20, 100, 100);
+  geometry.rotateX(-Math.PI / 2);
+
   const material = new THREE.MeshPhongMaterial({
-    // 재질 설정
     color: 0xffffff,
-    side: THREE.DoubleSide,
+
     wireframe: true,
   });
 
-  const surface = new THREE.Mesh(geometry, material); // 메쉬 생성
+  const surface = new THREE.Mesh(geometry, material);
+  surface.position.y = -1;
+
+  // 시그모이드 falloff
+  const smoothFalloff = (r, center = 1.0, k = 5.0) => {
+    return 1 - 1 / (1 + Math.exp(-k * (r - center)));
+  };
 
   surface.updateCurvature = (bodies) => {
-    // 곡률 업데이트 함수
     const pos = surface.geometry.attributes.position.array;
 
     for (let i = 0; i < pos.length; i += 3) {
       const x = pos[i];
       const z = pos[i + 2];
-      let y = 1;
+
+      let gravitySum = 0;
 
       bodies.forEach((body) => {
         const dx = x - body.pos.x;
         const dz = z - body.pos.z;
-        const r = Math.sqrt(dx * dx + dz * dz) + 0.2;
-        y += -body.mass / r;
+        const r = Math.sqrt(dx * dx + dz * dz);
+
+        // Softening + 시그모이드로 감쇠
+        const softened = 1 / (r + 0.5); // 폭주 방지
+        const falloff = smoothFalloff(r, 1.5, 5); // 중심에서 완화
+
+        const gravity = Math.sqrt(body.mass) * softened * falloff;
+
+        gravitySum += gravity;
       });
 
-      pos[i + 1] = y * 0.05 -1;
+      pos[i + 1] = -gravitySum * 0.3;
     }
 
     surface.geometry.attributes.position.needsUpdate = true;
