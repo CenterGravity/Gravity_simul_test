@@ -3,8 +3,8 @@ export function calculateGravityForce(m1, m2, pos1, pos2) {
   const dx = pos2.x - pos1.x; // 두 물체 사이의 거리 벡터 계산
   const dy = pos2.y - pos1.y; // 두 좌표의 차이가 거리이다
   const dz = pos2.z - pos1.z; // 고로 그 숫자들이 벡터의 성분이 됨.
-  const Min_dist = 0.3; // 최소 거리 설정 (충돌 방지)
-  const distance = Math.max(Min_dist, Math.sqrt(dx * dx + dy * dy + dz * dz)); // 거리의 크기 계산
+  const minDist = 0.3; // 최소 거리 설정 (충돌 방지)
+  const distance = Math.max(minDist, Math.sqrt(dx * dx + dy * dy + dz * dz)); // 거리의 크기 계산
   const G = 0.3; // 임시 상수, 나중에 조정 가능
   const forceMagnitude = (G * m1 * m2) / (distance * distance);
   const fx = (dx / distance) * forceMagnitude; // 힘 벡터 계산
@@ -35,7 +35,7 @@ export function updatePositions(bodies, dt) {
 
     forces.push(totalForce);
   }
-  const prevA = []
+  const prevA = [];
   for (let i = 0; i < bodies.length; i++) {
     // 위치와 속도 업데이트
     const a = {
@@ -74,16 +74,16 @@ export function updatePositions(bodies, dt) {
       y: newForces[i].y / bodies[i].mass,
       z: newForces[i].z / bodies[i].mass,
     };
-  
+
     bodies[i].vel.x += 0.5 * (prevA[i].x + newA.x) * dt;
     bodies[i].vel.y += 0.5 * (prevA[i].y + newA.y) * dt;
     bodies[i].vel.z += 0.5 * (prevA[i].z + newA.z) * dt;
-  
+
     // 감쇠 추가 (에너지 폭발 방지용)
     bodies[i].vel.x *= 0.999;
     bodies[i].vel.y *= 0.999;
     bodies[i].vel.z *= 0.999;
   }
-  
+
   return bodies;
 }
